@@ -73,7 +73,7 @@ def process_sar(source, log_file):
     hms_ms = None
     prev_hms_ms = None
     no_names = {}
-    desc = {"class": "throughput", "source": source}
+    desc = {"class": "throughput", "source": source, "default-aggregation": "sum"}
 
     try:
         fh, _ = open_read_text_file(log_file)
@@ -328,7 +328,7 @@ def process_mpstat(fork_idx, num_forks, log_file, cpu_topo):
     ymd_timestamp_ms = None
     hms_ms = None
     prev_hms_ms = None
-    desc = {"class": "throughput", "source": "mpstat"}
+    desc = {"class": "percentage", "source": "mpstat", "default-aggregation": "avg"}
     sample = {}
 
     try:
@@ -418,7 +418,6 @@ def process_iostat(log_file):
 
                 rate_m = re.match(r'(.*)(\/s|util)$', field_name)
                 if rate_m:
-                    desc["class"] = "throughput"
                     oper = rate_m.group(1)
                     cmd_m = re.match(r'^(w|r|d|f)(.*)$', oper)
                     if cmd_m:
@@ -426,18 +425,30 @@ def process_iostat(log_file):
                         type_map = {"": "operations-sec", "rqm": "operations-merged-sec", "kB": "kB-sec", "qm": "request-merges-sec"}
                         names["cmd"] = cmd_map.get(cmd_m.group(1), cmd_m.group(1))
                         desc["type"] = type_map.get(cmd_m.group(2), cmd_m.group(2))
+                        desc["class"] = "throughput"
+                        desc["default-aggregation"] = "sum"
                     elif field_name == "util":
                         desc["type"] = "percent-utilization"
+                        desc["class"] = "percentage"
+                        desc["default-aggregation"] = "avg"
                 else:
-                    desc["class"] = "count"
                     cmd_m = re.match(r'^(w|r|d|f)(.+)$', field_name)
                     if cmd_m:
                         cmd_map = {"r": "read", "w": "write", "d": "discard", "f": "flush"}
                         type_map = {"rqm": "percent-merged", "_await": "avg-service-time-ms", "areq-sz": "avg-req-size-kB"}
                         names["cmd"] = cmd_map.get(cmd_m.group(1), cmd_m.group(1))
                         desc["type"] = type_map.get(cmd_m.group(2), cmd_m.group(2))
+                        if cmd_m.group(2) == "rqm":
+                            desc["class"] = "percentage"
+                        elif cmd_m.group(2) == "_await":
+                            desc["class"] = "latency"
+                        else:
+                            desc["class"] = "count"
+                        desc["default-aggregation"] = "avg"
                     elif field_name == "aqu-sz":
                         desc["type"] = "avg-queue-length"
+                        desc["class"] = "count"
+                        desc["default-aggregation"] = "avg"
 
                 if "type" in desc and time_ms is not None and sample["value"] is not None:
                     metrics.log_sample("iostat", desc, names, sample)
@@ -500,7 +511,7 @@ def process_pidstat(log_file):
             time_ms = ymd_timestamp_ms + hms_ms
 
             command = m.group(12)
-            desc = {"source": "pidstat", "class": "throughput"}
+            desc = {"source": "pidstat", "class": "percentage", "default-aggregation": "avg"}
             fields = {"usr": float(m.group(6)), "system": float(m.group(7)), "guest": float(m.group(8)), "wait": float(m.group(9))}
 
             for field_name, val in fields.items():

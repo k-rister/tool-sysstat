@@ -328,7 +328,7 @@ def process_mpstat(fork_idx, num_forks, log_file, cpu_topo):
     ymd_timestamp_ms = None
     hms_ms = None
     prev_hms_ms = None
-    desc = {"class": "percentage", "source": "mpstat", "default-aggregation": "avg"}
+    desc = {"class": "throughput", "source": "mpstat", "default-aggregation": "sum"}
     sample = {}
 
     try:
@@ -511,7 +511,7 @@ def process_pidstat(log_file):
             time_ms = ymd_timestamp_ms + hms_ms
 
             command = m.group(12)
-            desc = {"source": "pidstat", "class": "percentage", "default-aggregation": "avg"}
+            desc = {"source": "pidstat", "class": "throughput", "default-aggregation": "sum"}
             fields = {"usr": float(m.group(6)), "system": float(m.group(7)), "guest": float(m.group(8)), "wait": float(m.group(9))}
 
             for field_name, val in fields.items():

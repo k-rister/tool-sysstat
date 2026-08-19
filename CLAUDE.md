@@ -20,6 +20,12 @@ Collects system performance metrics using Linux sysstat utilities (mpstat, sar, 
 - `--subtools <list>` — Comma-separated subtools to run (default: `mpstat,sar,iostat,pidstat`)
 - `--interval <seconds>` — Collection interval (default: `3`)
 
+## mpstat CPU breakout dimensions
+Beyond `num` (CPU number), mpstat metrics carry these CDM breakout dimensions, all derived from sysfs CPU topology data collected by `sysstat-start` and resolved via toolbox's `system_cpu_topology.build_cpu_topology()`/`get_cpu_topology()`/`get_cpu_node()`/`get_cpu_cache_domains()`:
+- `cpu` — string alias for `num`, matching the naming already used by `tool-procstat`/`tool-kernel`
+- `node` — NUMA node, when determinable. Collected into a `cpu-numa-nodes.txt` manifest by `sysstat-start` rather than copied directly from sysfs: a CPU's `nodeN` entry is a symlink, and sysfs symlinks report a zero apparent size, which breaks `cpio`'s `readlink()` call
+- `shared-lN-domain` (e.g. `shared-l1-domain`, `shared-l3-domain`) — one per cache level present on the host, valued as the formatted CPU range sharing that cache instance (e.g. `"0-15"`). Dynamic per-platform on the collection side; registered in CDM's schema as explicit `shared-l1-domain` through `shared-l4-domain` fields rather than a wildcard match
+
 ## Conventions
 - Primary branch is `master`
 - Runs as a profiler tool on master/worker/profiler roles, blocked on client/server

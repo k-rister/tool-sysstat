@@ -16,7 +16,12 @@ if TOOLBOX_HOME:
 
 from toolbox.cdm_metrics import CDMMetrics
 from toolbox.fileio import open_read_text_file
-from toolbox.system_cpu_topology import build_cpu_topology, get_cpu_topology
+from toolbox.system_cpu_topology import (
+    build_cpu_topology,
+    get_cpu_topology,
+    get_cpu_node,
+    get_cpu_cache_domains,
+)
 
 
 def build_netdev_types():
@@ -364,10 +369,20 @@ def process_mpstat(fork_idx, num_forks, log_file, cpu_topo):
             if cpu_num % num_forks != fork_idx:
                 continue
             package, die, core, thread = get_cpu_topology(cpu_num, cpu_topo)
+            node = get_cpu_node(cpu_num, cpu_topo)
+            cache_domains = get_cpu_cache_domains(cpu_num, cpu_topo)
             for cpu_type in cpu_entry:
                 if cpu_type == "cpu":
                     continue
-                names = {"package": package, "die": die, "core": core, "thread": thread, "num": cpu_num, "type": cpu_type}
+                # "cpu" is a string alias for "num" (kept for backwards
+                # compatibility) -- stored as a string to match the
+                # "keyword" mapping type already used by every other tool
+                # that reports a "cpu" breakout (procstat, kernel).
+                names = {"package": package, "die": die, "core": core, "thread": thread, "num": cpu_num, "cpu": str(cpu_num), "type": cpu_type}
+                if node is not None:
+                    names["node"] = str(node)
+                for level, domain in cache_domains.items():
+                    names[f"shared-l{level}-domain"] = domain
                 if cpu_type in ("idle", "iowait", "steal"):
                     desc["type"] = "NonBusy-CPU"
                 else:

@@ -42,7 +42,21 @@ done
 
 # To be used by mpstat for post-processing
 if [ -e /sys/devices/system/cpu/ ]; then
-    find /sys/devices/system/cpu/ | grep topology | cpio -pdumv --quiet . 2>/dev/null
+    find /sys/devices/system/cpu/ | grep -E 'topology|cache/index[0-9]+/(level|shared_cpu_list)$' | cpio -pdumv --quiet . 2>/dev/null
+
+    # NUMA node per CPU: sysfs exposes this as a nodeN symlink directly
+    # under each cpuN directory. That symlink reports a zero apparent
+    # size, which breaks cpio's readlink() call ("Cannot readlink:
+    # Invalid argument"), so resolve it ourselves into a manifest file
+    # instead -- same approach as netdev-types.txt below.
+    for cpu_dir in /sys/devices/system/cpu/cpu[0-9]*; do
+        for node_path in ${cpu_dir}/node[0-9]*; do
+            if [ -e "${node_path}" ]; then
+                echo "$(basename ${cpu_dir}) $(basename ${node_path})" >>cpu-numa-nodes.txt
+                break
+            fi
+        done
+    done
 else
     echo "WARNING: could not find /sys/devices/system/cpu/"
 fi

@@ -1,0 +1,20 @@
+{
+    "presets": {
+        "defaults" : [
+            { "arg": "subtools", "vals": ["mpstat,sar,iostat,pidstat"] },
+            { "arg": "interval", "vals": ["3"] }
+        ]
+    },
+    "validations": {
+        "subtool_list" : {
+            "description" : "comma-separated list of sysstat subtools to run, any combination of mpstat/sar/iostat/pidstat",
+            "args" : [ "subtools" ],
+            "vals": "^(mpstat|sar|iostat|pidstat)(,(mpstat|sar|iostat|pidstat))*$"
+        },
+        "positive_integer" : {
+            "description" : "a whole number greater than 0",
+            "args" : [ "interval" ],
+            "vals": "^[1-9][0-9]*$"
+        }
+    }
+}

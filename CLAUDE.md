@@ -15,6 +15,8 @@ Collects system performance metrics using Linux sysstat utilities (mpstat, sar, 
 | `sysstat-post-process.py` | Parses raw sysstat output into crucible metrics using CDMMetrics |
 | `rickshaw.json` | Rickshaw integration: endpoint allow/block lists, file deployment, post-process script |
 | `workshop.json` | Engine image build: compiles sysstat v12.5.1 from source |
+| `tool-metadata.json` | Machine-readable description, subtool list, and CDM-indexed status (consumed by `crucible tools list`) |
+| `multiplex.json` | Parameter validation rules and `defaults` preset for multiplex (mirrors benchmark `multiplex.json`) |
 
 ## Configuration
 - `--subtools <list>` — Comma-separated subtools to run (default: `mpstat,sar,iostat,pidstat`)

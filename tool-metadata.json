@@ -1,0 +1,102 @@
+{
+  "rickshaw-tool-metadata": {
+    "schema": {
+      "version": "2026.08.11"
+    }
+  },
+  "tool": "sysstat",
+  "description": "System activity reporting via the Linux sysstat package -- per-CPU utilization, memory/IO/scheduler pressure, network throughput, block device IO, and per-process CPU usage.",
+  "subtools": [
+    {
+      "name": "mpstat",
+      "description": "Per-CPU utilization breakdown (user/system/idle/iowait/steal/etc.), forked across multiple parallel mpstat post-processing workers on high-CPU-count systems.",
+      "cdm_indexed": true,
+      "cdm_sources": [
+        {
+          "source": "mpstat-<fork-index>",
+          "types": ["NonBusy-CPU", "Busy-CPU"]
+        }
+      ],
+      "output_files": ["mpstat.json.xz"]
+    },
+    {
+      "name": "sar",
+      "description": "System activity reporting: memory/paging/swapping, IO pressure, task/scheduler stats, and network throughput/errors. A single sar invocation's output is split into 5 distinct CDM sources by section.",
+      "cdm_indexed": true,
+      "cdm_sources": [
+        {
+          "source": "sar-mem",
+          "types": [
+            "KB-Paged-in-sec", "KB-Paged-out-sec", "Pages-freed-sec",
+            "kswapd-scanned-pages-sec", "scanned-pages-sec", "reclaimed-pages-sec", "VM-Efficiency",
+            "Page-faults-sec",
+            "Pages-swapped-in-sec", "Pages-swapped-out-sec",
+            "%-Time-Tasks-Waiting-on-Memory-010s", "%-Time-Tasks-Waiting-on-Memory-060s",
+            "%-Time-Tasks-Waiting-on-Memory-300s", "%-Time-Tasks-Waiting-on-Memory-last_interval",
+            "%-Time-Non-Idle-Tasks-Stalled-on-Memory-010s", "%-Time-Non-Idle-Tasks-Stalled-on-Memory-060s",
+            "%-Time-Non-Idle-Tasks-Stalled-on-Memory-300s", "%-Time-Non-Idle-Tasks-Stalled-on-Memory-last_interval",
+            "Memory-Free-KB", "Memory-Available-KB", "Memory-Used-KB", "Memory-Used-Percent",
+            "Memory-Buffers-KB", "Memory-Cached-KB", "Memory-Commit-KB", "Memory-Commit-Percent",
+            "Memory-Active-KB", "Memory-Inactive-KB", "Memory-Dirty-KB"
+          ]
+        },
+        {
+          "source": "sar-io",
+          "types": [
+            "%-Time-Tasks-Lost-Waiting-on-IO-010s", "%-Time-Tasks-Lost-Waiting-on-IO-060s",
+            "%-Time-Tasks-Lost-Waiting-on-IO-300s", "%-Time-Tasks-Lost-Waiting-on-IO-last_interval",
+            "%-Time-Tasks-Stalled-Waiting-on-IO-010s", "%-Time-Tasks-Stalled-Waiting-on-IO-060s",
+            "%-Time-Tasks-Stalled-Waiting-on-IO-300s", "%-Time-Tasks-Stalled-Waiting-on-IO-last_interval"
+          ]
+        },
+        {
+          "source": "sar-tasks",
+          "types": ["Processes-created-sec", "Context-switches-sec"]
+        },
+        {
+          "source": "sar-scheduler",
+          "types": [
+            "%-Time-Tasks-CPU-Starved-010s", "%-Time-Tasks-CPU-Starved-060s",
+            "%-Time-Tasks-CPU-Starved-300s", "%-Time-Tasks-CPU-Starved-last_interval",
+            "Run-Queue-Length", "Process-List-Size",
+            "Load-Average-01m", "Load-Average-05m", "Load-Average-15m",
+            "IO-Blocked-Tasks"
+          ]
+        },
+        {
+          "source": "sar-net",
+          "types": ["L2-Gbps", "packets-sec", "errors-sec"]
+        }
+      ],
+      "output_files": ["sar-stdout.txt.xz"]
+    },
+    {
+      "name": "iostat",
+      "description": "Per-block-device IO throughput, latency, and utilization.",
+      "cdm_indexed": true,
+      "cdm_sources": [
+        {
+          "source": "iostat",
+          "types": [
+            "operations-sec", "operations-merged-sec", "kB-sec", "request-merges-sec",
+            "percent-utilization", "percent-merged", "avg-service-time-ms",
+            "avg-req-size-kB", "avg-queue-length"
+          ]
+        }
+      ],
+      "output_files": ["iostat.json.xz"]
+    },
+    {
+      "name": "pidstat",
+      "description": "Per-process CPU usage breakdown (user/system/guest/wait) for all running processes.",
+      "cdm_indexed": true,
+      "cdm_sources": [
+        {
+          "source": "pidstat",
+          "types": ["NonBusy-CPU", "Busy-CPU"]
+        }
+      ],
+      "output_files": ["pidstat-stdout.txt.xz"]
+    }
+  ]
+}
